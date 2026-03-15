@@ -2,7 +2,7 @@
 # This workflow is used to build overleaf image automatically
 #
 # Published at:
-#     ghcr.io/m0rtzz/overleaf/ops
+#     ghcr.io/hust-open-atom-club/overleaf/ops
 #
 # ---------------------------------
 
@@ -22,7 +22,7 @@ permissions:
 
 env:
   DOCKER_REGISTRY: ghcr.io
-  IMAGE_NAME: m0rtzz/overleaf
+  IMAGE_NAME: hust-open-atom-club/overleaf
 
 jobs:
   build-image:
@@ -46,7 +46,7 @@ jobs:
       - name: "Sync package-lock.json And Prepare .dockerignore"
         run: |
           docker run --rm -v "$(pwd)":/workspace -w /workspace node:22.18.0 npm install --package-lock-only --ignore-scripts
-          docker run --rm -v "$(pwd)/services/web/":/overleaf/services/web -w /overleaf/services/web ghcr.io/m0rtzz/overleaf/dev:webpack npm run extract-translations
+          docker run --rm -v "$(pwd)/services/web/":/overleaf/services/web -w /overleaf/services/web ghcr.io/hust-open-atom-club/overleaf/dev:webpack npm run extract-translations
           cd ./server-ce/
           cp .dockerignore ../
 
@@ -98,7 +98,7 @@ jobs:
           tags: |
             sharelatex/sharelatex:latest
           labels: |
-            com.m0rtzz.overleaf.ops.revision=${{ steps.vars.outputs.MONOREPO_REVISION }}
+            club.openatom.hust.overleaf.ops.revision=${{ steps.vars.outputs.MONOREPO_REVISION }}
           # We don't want -${{ github.ref_name }} limit, just more cache hit
           cache-from: type=gha,scope=ops
           cache-to: type=gha,mode=max,scope=ops
@@ -127,6 +127,7 @@ jobs:
         with:
           image-names: overleaf/ops*
           cut-off: A week ago UTC+8
-          account-type: personal
+          account-type: org
+          org-name: hust-open-atom-club
           untagged-only: false
           token: ${{ secrets.GHCR_PAT }}
