@@ -1,36 +1,36 @@
 services:
   chat:
-    image: ghcr.io/m0rtzz/overleaf/dev:chat
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:chat
 
   clsi:
-    image: ghcr.io/m0rtzz/overleaf/dev:clsi
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:clsi
 
   contacts:
-    image: ghcr.io/m0rtzz/overleaf/dev:contacts
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:contacts
 
   docstore:
-    image: ghcr.io/m0rtzz/overleaf/dev:docstore
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:docstore
 
   document-updater:
-    image: ghcr.io/m0rtzz/overleaf/dev:document-updater
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:document-updater
 
   filestore:
-    image: ghcr.io/m0rtzz/overleaf/dev:filestore
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:filestore
 
   history-v1:
-    image: ghcr.io/m0rtzz/overleaf/dev:history-v1
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:history-v1
 
   notifications:
-    image: ghcr.io/m0rtzz/overleaf/dev:notifications
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:notifications
 
   project-history:
-    image: ghcr.io/m0rtzz/overleaf/dev:project-history
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:project-history
 
   real-time:
-    image: ghcr.io/m0rtzz/overleaf/dev:real-time
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:real-time
 
   web:
-    image: ghcr.io/m0rtzz/overleaf/dev:web
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:web
 
   webpack:
-    image: ghcr.io/m0rtzz/overleaf/dev:webpack
+    image: ghcr.io/hust-open-atom-club/overleaf/dev:webpack
