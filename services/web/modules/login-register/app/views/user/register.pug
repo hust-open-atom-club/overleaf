@@ -14,6 +14,15 @@ block content
 							.page-header.login-register-page-header
 								h1.login-register-header-heading-focus(style='font-family: Merriweather, serif; margin-bottom: 12.5px !important;') #{translate("register")}
 								.login-register-hr-text-container(style='margin-top: 1px; padding: 5px 0;')
+								.notification.notification-type-info(style='margin-top: 18px; margin-bottom: 5px;' role='note')
+									.notification-icon
+										+material-symbol('info')
+									.notification-content-and-cta
+										.notification-content.text-left(style='font-family: Lato, sans-serif;')
+											p Registration requires a Huazhong University of Science and Technology email address (*@hust.edu.cn).
+											p We recommend using HUST CAS directly to log in.
+											p If you still prefer to register with email, after registration and login, you can link your HUST CAS in "Account Settings" so that next time you can use "Log in with HUST CAS" to access this account.
+											p(style='font-weight: bold; font-style: italic;') To keep everything under the same account, please link HUST CAS there instead of registering by email and later logging in separately with "Log in with HUST CAS", which would create a second account and make maintenance more difficult for us. Thank you for your understanding :).
 							form(
 								data-ol-async-form
 								name='registerForm'
@@ -29,7 +38,7 @@ block content
 									.notification-content.text-left(style='font-family: Lato, sans-serif;')
 										p Your account activation email has been sent. Please check your inbox and follow the instructions to complete activation.
 										p If you don't see the email in your inbox, please check your spam folder first.
-										p If you still can't locate it or encounter other issues, contact us at !{`<a href="mailto:${process.env.OVERLEAF_ADMIN_EMAIL}" style="color: #098842;">${process.env.OVERLEAF_ADMIN_EMAIL}</a>`}.
+										p If you still can't locate it or encounter other issues, contact us at #[a(href='mailto:' + process.env.OVERLEAF_ADMIN_EMAIL style='color: #098842;')= process.env.OVERLEAF_ADMIN_EMAIL].
 										p(style='font-weight: bold; font-style: italic;') The activation link will expire in one week, after which you'll need to register again.
 								div(data-ol-not-sent)
 									+formMessages()
@@ -51,7 +60,7 @@ block content
 										aria-label='email'
 										type='email'
 										name='email'
-										placeholder='email@example.edu.cn'
+										placeholder='email@hust.edu.cn'
 										required
 										autocomplete='username'
 										autofocus
