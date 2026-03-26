@@ -34,7 +34,7 @@ function TemplateGalleryPageContent() {
     <>
       <DefaultNavbar {...navbarProps} />
       <main id="main-content"
-        className={`content content-page gallery ${category ? 'gallery-tagged' : ''}`}
+        className={`content content-page gallery gallery-page ${category ? 'gallery-tagged' : ''}`}
       >
         <div className="container">
           {category ? (
