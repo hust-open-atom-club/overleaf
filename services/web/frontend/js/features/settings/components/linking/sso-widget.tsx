@@ -73,7 +73,7 @@ export function SSOLinkingWidget({
     <div className="settings-widget-container">
       <div>{providerLogos[providerId] || providerLogos.oidc}</div>
       <div className="description-container">
-        <div className="title-row">
+        <div className="title-row" style={{ marginBottom: 0 }}>
           <h4 id={providerId}>{title}</h4>
         </div>
         <p className="small">

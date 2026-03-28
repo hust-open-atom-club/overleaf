@@ -3,7 +3,7 @@
 # and push them to GitHub Container Registry
 #
 # Published at:
-#     ghcr.io/m0rtzz/overleaf/dev
+#     ghcr.io/hust-open-atom-club/overleaf/dev
 #
 # ---------------------------------
 
@@ -80,8 +80,8 @@ jobs:
           export BUILDX_NO_DEFAULT_ATTESTATIONS=1
           cd ./develop/
           bin/build ${{ matrix.image-name }}
-          docker tag develop-${{ matrix.image-name }}:latest ${{ env.GHCR_REGISTRY }}/m0rtzz/overleaf/dev:${{ matrix.image-name }}-${PLATFORM_PAIR}
-          docker push ${{ env.GHCR_REGISTRY }}/m0rtzz/overleaf/dev:${{ matrix.image-name }}-${PLATFORM_PAIR}
+          docker tag develop-${{ matrix.image-name }}:latest ${{ env.GHCR_REGISTRY }}/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }}-${PLATFORM_PAIR}
+          docker push ${{ env.GHCR_REGISTRY }}/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }}-${PLATFORM_PAIR}
 
   merge:
     runs-on: ubuntu-latest
@@ -121,13 +121,13 @@ jobs:
       - name: Create and push manifest list (multi-arch tag)
         run: |
           docker buildx imagetools create \
-            -t ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }} \
-            ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }}-amd64 \
-            ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }}-arm64
+            -t ghcr.io/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }} \
+            ghcr.io/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }}-amd64 \
+            ghcr.io/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }}-arm64
 
       - name: Inspect manifest
         run: |
-          docker buildx imagetools inspect ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }}
+          docker buildx imagetools inspect ghcr.io/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }}
 
   clean-image:
     runs-on: ubuntu-latest
@@ -138,6 +138,7 @@ jobs:
         with:
           image-names: overleaf/dev*
           cut-off: 7 days ago UTC
-          account-type: personal
+          account-type: org
+          org-name: hust-open-atom-club
           untagged-only: true
           token: ${{ secrets.GHCR_PAT }}
