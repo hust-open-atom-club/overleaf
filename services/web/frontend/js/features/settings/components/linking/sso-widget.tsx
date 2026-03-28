@@ -88,7 +88,7 @@ export function SSOLinkingWidget({
           <LinkingStatus status="error" description={errorMessage} />
         ) : null}
       </div>
-      <div>
+      <div className="settings-widget-action">
         <ActionButton
           titleId={providerId}
           unlinkRequestInflight={unlinkRequestInflight}

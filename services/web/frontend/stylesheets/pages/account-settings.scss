@@ -169,8 +169,38 @@
   padding-right: 0;
 }
 
-.linking-git-bridge-revoke-button {
+.linking-git-bridge-revoke-button.btn.btn-secondary {
   padding: var(--spacing-01) var(--spacing-02);
+  min-width: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--content-secondary-themed);
+  background-color: color-mix(
+    in srgb,
+    var(--content-primary-themed) 14%,
+    var(--bg-primary-themed)
+  );
+  border-color: transparent;
+  border-width: 0;
+
+  &:hover,
+  &:focus,
+  &:focus-visible,
+  &:active {
+    color: var(--content-primary-themed);
+    background-color: color-mix(
+      in srgb,
+      var(--content-primary-themed) 22%,
+      var(--bg-primary-themed)
+    );
+    border-color: transparent;
+  }
+
+  .material-symbols {
+    font-size: 18px;
+    line-height: 1;
+  }
 }
 
 .security-row {
@@ -344,17 +374,17 @@ body.account-settings-page {
     margin-bottom: 0;
   }
 
-  .settings-widget-container > div:last-child .btn.btn-secondary {
+  .settings-widget-action .btn.btn-secondary {
     background-color: #d6f1e2;
     border-color: transparent;
     border-width: 0;
     color: #098842;
   }
 
-  .settings-widget-container > div:last-child .btn.btn-secondary:hover,
-  .settings-widget-container > div:last-child .btn.btn-secondary:focus,
-  .settings-widget-container > div:last-child .btn.btn-secondary:focus-visible,
-  .settings-widget-container > div:last-child .btn.btn-secondary:active {
+  .settings-widget-action .btn.btn-secondary:hover,
+  .settings-widget-action .btn.btn-secondary:focus,
+  .settings-widget-action .btn.btn-secondary:focus-visible,
+  .settings-widget-action .btn.btn-secondary:active {
     background-color: #c7ebd7;
     border-color: transparent;
     color: #1e6b41;

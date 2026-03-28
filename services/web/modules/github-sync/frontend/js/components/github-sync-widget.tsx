@@ -108,7 +108,7 @@ const GitHubSyncWidgetInner = function GitHubSyncWidget() {
           </div>
         </div>
 
-        <div>
+        <div className="settings-widget-action">
           {isConnected ? (
             <OLButton
               variant="danger-ghost"

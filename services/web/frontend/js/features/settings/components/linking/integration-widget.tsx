@@ -79,7 +79,7 @@ export function IntegrationLinkingWidget({
         </p>
         {hasFeature && statusIndicator}
       </div>
-      <div>
+      <div className="settings-widget-action">
         <ActionButton
           titleId={id}
           integration={title}
