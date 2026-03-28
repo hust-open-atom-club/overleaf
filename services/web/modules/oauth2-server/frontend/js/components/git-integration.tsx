@@ -180,44 +180,45 @@ function LinkingGitBridgeTable() {
 function GitIntegrationSetting() {
     const { t } = useTranslation()
     return (
-        <div className="settings-widget-container">
-            <div className="linking-icon-fixed-position">
-                <GitLogoOrange/>
-            </div>
-
+        <div className="settings-widget-container settings-widget-container-inline-title">
             <div className="description-container small">
                 <div className="title-row">
+                    <span className="settings-widget-inline-icon" aria-hidden="true">
+                        <GitLogoOrange />
+                    </span>
                     <h4>{t('git_integration')}</h4>
                 </div>
-                <p className="small">
-                    <Trans
-                        i18nKey="git_integration_info"
-                        components={[
-                            <a
-                                key="git-integration-link"
-                                href="/learn/how-to/Using_Git_and_GitHub"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            ></a>
-                        ]}
-                    />
-                </p>
-                <h4 className="ui-heading">{t('your_git_access_tokens')}</h4>
-                <p className="small">{t('your_git_access_info')}</p>
-                <ul className="small">
-                    <li>{t('your_git_access_info_bullet_1')}</li>
-                    <li>{t('your_git_access_info_bullet_2')}</li>
-                    <li>
+                <div className="settings-widget-inline-body">
+                    <p className="small">
                         <Trans
-                            i18nKey="your_git_access_info_bullet_3"
-                            components={[<strong key="strong"></strong>]}
+                            i18nKey="git_integration_info"
+                            components={[
+                                <a
+                                    key="git-integration-link"
+                                    href="/learn/how-to/Using_Git_and_GitHub"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                ></a>
+                            ]}
                         />
-                    </li>
-                    <li>{t('your_git_access_info_bullet_4')}</li>
-                    <li>{t('your_git_access_info_bullet_5')}</li>
-                </ul>
+                    </p>
+                    <h4 className="ui-heading">{t('your_git_access_tokens')}</h4>
+                    <p className="small">{t('your_git_access_info')}</p>
+                    <ul className="small">
+                        <li>{t('your_git_access_info_bullet_1')}</li>
+                        <li>{t('your_git_access_info_bullet_2')}</li>
+                        <li>
+                            <Trans
+                                i18nKey="your_git_access_info_bullet_3"
+                                components={[<strong key="strong"></strong>]}
+                            />
+                        </li>
+                        <li>{t('your_git_access_info_bullet_4')}</li>
+                        <li>{t('your_git_access_info_bullet_5')}</li>
+                    </ul>
 
-                <LinkingGitBridgeTable />
+                    <LinkingGitBridgeTable />
+                </div>
             </div>
         </div>
     )

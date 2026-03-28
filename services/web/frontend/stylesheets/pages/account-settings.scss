@@ -118,12 +118,40 @@
   }
 }
 
+.settings-widget-container-inline-title {
+  grid-template-columns: 1fr auto;
+
+  .title-row {
+    gap: var(--spacing-07);
+  }
+}
+
+.settings-widget-inline-icon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--content-primary-themed);
+}
+
+.settings-widget-inline-body {
+  margin-left: calc(40px + var(--spacing-07));
+}
+
 @include media-breakpoint-down(md) {
   .settings-widget-container {
     grid-template-columns: 1fr;
 
     .title-row {
       display: unset;
+    }
+  }
+
+  .settings-widget-container-inline-title {
+    .title-row {
+      display: flex;
     }
   }
 }
@@ -316,15 +344,39 @@ body.account-settings-page {
     margin-bottom: 0;
   }
 
-  #linked-accounts + .settings-widgets-container .btn.btn-secondary {
+  .settings-widget-container > div:last-child .btn.btn-secondary {
+    background-color: #d6f1e2;
+    border-color: transparent;
+    border-width: 0;
     color: #098842;
   }
 
-  #linked-accounts + .settings-widgets-container .btn.btn-secondary:hover,
-  #linked-accounts + .settings-widgets-container .btn.btn-secondary:focus,
-  #linked-accounts + .settings-widgets-container .btn.btn-secondary:focus-visible,
-  #linked-accounts + .settings-widgets-container .btn.btn-secondary:active {
+  .settings-widget-container > div:last-child .btn.btn-secondary:hover,
+  .settings-widget-container > div:last-child .btn.btn-secondary:focus,
+  .settings-widget-container > div:last-child .btn.btn-secondary:focus-visible,
+  .settings-widget-container > div:last-child .btn.btn-secondary:active {
+    background-color: #c7ebd7;
+    border-color: transparent;
     color: #1e6b41;
+  }
+
+  .settings-widgets-container .btn.btn-danger-ghost {
+    @include ol-button-variant(
+      $color: var(--content-danger-themed),
+      $background: color-mix(
+        in srgb,
+        var(--content-danger-themed) 8%,
+        var(--bg-primary-themed)
+      ),
+      $border: var(--border-primary-themed),
+      $hover-background: color-mix(
+        in srgb,
+        var(--content-danger-themed) 12%,
+        var(--bg-primary-themed)
+      ),
+      $hover-border: var(--border-hover-themed),
+      $borderless: false
+    );
   }
 }
 

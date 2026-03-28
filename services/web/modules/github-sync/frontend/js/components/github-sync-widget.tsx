@@ -55,19 +55,19 @@ const GitHubSyncWidgetInner = function GitHubSyncWidget() {
 
   if (isCheckingConn) {
     return (
-      <div className="settings-widget-container">
-        <div>
-          <GithubLogo />
-        </div>
-
-        <div className="description-container">
+      <div className="settings-widget-container settings-widget-container-inline-title">
+        <div className="description-container small">
           <div className="title-row">
+            <span className="settings-widget-inline-icon" aria-hidden="true">
+              <GithubLogo />
+            </span>
             <h4>GitHub</h4>
           </div>
-
-          <p className="small">
-            <span>{t('loading')}…</span>
-          </p>
+          <div className="settings-widget-inline-body">
+            <p className="small">
+              <span>{t('loading')}…</span>
+            </p>
+          </div>
         </div>
       </div>
     )
@@ -75,37 +75,37 @@ const GitHubSyncWidgetInner = function GitHubSyncWidget() {
 
   return (
     <>
-      <div className="settings-widget-container">
-        <div>
-          <GithubLogo size={40} />
-        </div>
-
-        <div className="description-container">
+      <div className="settings-widget-container settings-widget-container-inline-title">
+        <div className="description-container small">
           <div className="title-row">
+            <span className="settings-widget-inline-icon" aria-hidden="true">
+              <GithubLogo size={40} />
+            </span>
             <h4 id="github-sync">GitHub</h4>
           </div>
+          <div className="settings-widget-inline-body">
+            <p className="small">
+              {t('github_sync_description', { appName })}
+            </p>
 
-          <p className="small">
-            {t('github_sync_description', { appName })}
-          </p>
+            {isErrorConnCheck && (
+              <div className="notification-list">
+                <Notification
+                  type="error"
+                  content={t('github_sync_error')}
+                />
+              </div>
+            )}
 
-          {isErrorConnCheck && (
-            <div className="notification-list">
-              <Notification
-                type="error"
-                content={t('github_sync_error')}
-              />
-            </div>
-          )}
-
-          {isErrorUnlink && (
-            <div className="notification-list">
-              <Notification
-                type="error"
-                content={t('generic_something_went_wrong')}
-              />
-            </div>
-          )}
+            {isErrorUnlink && (
+              <div className="notification-list">
+                <Notification
+                  type="error"
+                  content={t('generic_something_went_wrong')}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         <div>
