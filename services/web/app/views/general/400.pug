@@ -209,13 +209,17 @@ append css
 		}
 
 		.client-error-link,
-		.client-error-link:visited,
-		.client-error-link:hover,
-		.client-error-link:focus {
+		.client-error-link:visited {
 			color: var(--client-error-link);
 			text-decoration: underline;
 			text-decoration-thickness: 1px;
 			text-underline-offset: 3px;
+		}
+
+		.client-error-link:hover,
+		.client-error-link:focus {
+			color: var(--client-error-link);
+			text-decoration: none;
 		}
 
 		.client-error-actions {

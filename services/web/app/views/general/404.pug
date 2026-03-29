@@ -187,13 +187,17 @@ append css
 		}
 
 		.not-found-link,
-		.not-found-link:visited,
-		.not-found-link:hover,
-		.not-found-link:focus {
+		.not-found-link:visited {
 			color: var(--not-found-link);
 			text-decoration: underline;
 			text-decoration-thickness: 1px;
 			text-underline-offset: 3px;
+		}
+
+		.not-found-link:hover,
+		.not-found-link:focus {
+			color: var(--not-found-link);
+			text-decoration: none;
 		}
 
 		.not-found-actions {

@@ -367,16 +367,20 @@ block css
 
 		body.site-status-page .site-status-link,
 		body.site-status-page .site-status-link:visited,
-		body.site-status-page .site-status-link:hover,
-		body.site-status-page .site-status-link:focus,
 		body.site-status-page .site-status-html-message a,
-		body.site-status-page .site-status-html-message a:visited,
-		body.site-status-page .site-status-html-message a:hover,
-		body.site-status-page .site-status-html-message a:focus {
+		body.site-status-page .site-status-html-message a:visited {
 			color: var(--green-50);
 			text-decoration: underline;
 			text-decoration-thickness: 1px;
 			text-underline-offset: 3px;
+		}
+
+		body.site-status-page .site-status-link:hover,
+		body.site-status-page .site-status-link:focus,
+		body.site-status-page .site-status-html-message a:hover,
+		body.site-status-page .site-status-html-message a:focus {
+			color: var(--green-50);
+			text-decoration: none;
 		}
 
 		@media (max-width: 900px) {

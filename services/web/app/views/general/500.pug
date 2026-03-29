@@ -186,13 +186,17 @@ append css
 		}
 
 		.server-error-link,
-		.server-error-link:visited,
-		.server-error-link:hover,
-		.server-error-link:focus {
+		.server-error-link:visited {
 			color: var(--server-error-link);
 			text-decoration: underline;
 			text-decoration-thickness: 1px;
 			text-underline-offset: 3px;
+		}
+
+		.server-error-link:hover,
+		.server-error-link:focus {
+			color: var(--server-error-link);
+			text-decoration: none;
 		}
 
 		.server-error-actions {
