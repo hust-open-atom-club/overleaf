@@ -62,7 +62,7 @@ const PersonalAccessTokenManager = {
 
         // Generate a new access token
         let createdAt = new Date()
-        let accessTokenExpiresAt = createdAt
+        let accessTokenExpiresAt = new Date(createdAt)
 
         // access token validity is 1 year
         accessTokenExpiresAt.setFullYear(accessTokenExpiresAt.getFullYear() + 1)

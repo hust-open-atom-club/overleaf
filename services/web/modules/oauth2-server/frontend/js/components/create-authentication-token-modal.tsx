@@ -1,6 +1,6 @@
-import React, { useState, useCallback, memo } from 'react'
+import React, { memo } from 'react'
 
-import { Button, Modal } from 'react-bootstrap'
+import { Modal } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 import {
   OLModal,
@@ -9,6 +9,7 @@ import {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
+import OLButton from '@/shared/components/ol/ol-button'
 
 import { CopyToClipboard } from '@/shared/components/copy-to-clipboard'
 
@@ -53,15 +54,14 @@ function ModalDeleteAuthenticationToken({ handleHide, accessToken }: Props) {
                 </p>
             </Modal.Body>
 
-            <Modal.Footer>
-                <Button
+            <OLModalFooter>
+                <OLButton
                     onClick={handleHide}
                     variant="secondary"
-                    className="btn-primary"
                 >
                     {t('close')}
-                </Button>
-            </Modal.Footer>
+                </OLButton>
+            </OLModalFooter>
         </>
     )
 }

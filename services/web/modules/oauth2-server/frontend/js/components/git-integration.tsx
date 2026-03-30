@@ -90,16 +90,16 @@ function LinkingGitBridgeTable() {
                             </Col>
                             <Col md={2} className="d-none d-sm-block">
                                 <EmailCell>
-                                    {moment(token.created_at).format('Do MMM YYYY')}
+                                    {moment(token.createdAt).format('MMM D, YYYY')}
                                 </EmailCell>
                             </Col>
                             <Col md={2} className="d-none d-sm-block">
                                 <EmailCell>
-                                    {token.lastUsedAt == null ? "N/A" : moment(token.lastUsedAt).format('Do MMM YYYY')}
+                                    {token.lastUsedAt == null ? "N/A" : moment(token.lastUsedAt).format('MMM D, YYYY')}
                                 </EmailCell>
                             </Col>
                             <Col md={3} className="d-none d-sm-block">
-                                <EmailCell>{moment(token.accessTokenExpiresAt).format('Do MMM YYYY')}</EmailCell>
+                                <EmailCell>{moment(token.accessTokenExpiresAt).format('MMM D, YYYY')}</EmailCell>
                             </Col>
                             <Col md={1} className="d-none d-sm-block">
                                 <EmailCell>
