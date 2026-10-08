@@ -16,16 +16,18 @@ import OneTimeTokenHandler from '../../../../app/src/Features/Security/OneTimeTo
 import UserGetter from '../../../../app/src/Features/User/UserGetter.mjs'
 import UserUpdater from '../../../../app/src/Features/User/UserUpdater.mjs'
 import UserDeleter from '../../../../app/src/Features/User/UserDeleter.mjs'
+import UserSettingsHelper from '../../../../app/src/Features/Project/UserSettingsHelper.mjs'
 import ProjectDeleter from '../../../../app/src/Features/Project/ProjectDeleter.mjs'
 import OwnershipTransferHandler from '../../../../app/src/Features/Collaborators/OwnershipTransferHandler.mjs'
 import HttpErrorHandler from '../../../../app/src/Features/Errors/HttpErrorHandler.mjs'
 import ErrorController from '../../../../app/src/Features/Errors/ErrorController.mjs'
 import Errors, { OError } from '../../../../app/src/Features/Errors/Errors.js'
+import EmailHelper from '../../../../app/src/Features/Helpers/EmailHelper.mjs'
 import HaveIBeenPwned from '../../../../app/src/Features/Authentication/HaveIBeenPwned.mjs'
 import { db } from '../../../../app/src/infrastructure/mongodb.mjs'
 import AuthenticationManager from '../../../../app/src/Features/Authentication/AuthenticationManager.mjs'
 import SplitTestHandler from '../../../../app/src/Features/SplitTests/SplitTestHandler.mjs'
-import UserSettingsHelper from '../../../../app/src/Features/Project/UserSettingsHelper.mjs'
+import { getTokenUsage, resetTokenUsage } from '../../../workbench/app/src/TokenQuota.mjs'
 
 const __dirname = Path.dirname(fileURLToPath(import.meta.url))
 
@@ -104,8 +106,12 @@ async function manageUsersPage(req, res, next) {
     status: prefetchedUsersBlob ? 'success' : 'error',
   })
 
+  const user = await User.findById(userId, 'ace')
+  const userSettings = await UserSettingsHelper.buildUserSettings(req, res, user)
+
   res.render(Path.resolve(__dirname, '../views/manage-users-react'), {
     title: 'Manage Users',
+    userSettings,
     prefetchedUsersBlob,
     availableAuthMethods,
     userDetailsUpdatedOnLogin,
@@ -123,6 +129,7 @@ async function registerNewUser(req, res, next) {
   }
   delete req.body.isExternal
   req.body.password = crypto.randomBytes(32).toString('hex')
+  req.body.analyticsId = crypto.randomUUID()
 
  let user
   try {
@@ -246,6 +253,7 @@ async function _getUsers(
     suspended: 1,
     'features.collaborators': 1,
     'features.compileTimeout': 1,
+    'aiFeatures.enabled': 1,
   }
   const projectionDeleted = {};
   for (const key of Object.keys(projection)) {
@@ -277,8 +285,7 @@ async function _getUsers(
 
 // Return active users number
 async function _getActiveUsers() {
-  // An active user is one who has opened a project in this Server Pro 
-  // instance in the last 12 months.
+  // Count users active within the last 12 months.
   const yearAgo = new Date()
   yearAgo.setFullYear(yearAgo.getFullYear() - 1)
 
@@ -306,6 +313,7 @@ async function _searchUsers(searchTerm) {
     suspended: 1,
     'features.collaborators': 1,
     'features.compileTimeout': 1,
+    'aiFeatures.enabled': 1,
   }
 
   const activeUsers = await User.find({
@@ -374,8 +382,6 @@ function _sortAndPaginate(users, sort, page) {
     throw new OError('Invalid sorting criteria', { sort })
   }
 
-console.log("SORT = ", sort)
-
   const LAST = '\uffff'
   const sortedUsers =
     sort.by === 'name'
@@ -399,8 +405,8 @@ console.log("SORT = ", sort)
 function _formatUserInfo(user, maxDate) {
   let authMethods = []
   if (availableAuthMethods.includes('local') && user.hashedPassword) authMethods.push('local')
-  if (availableAuthMethods.includes('saml') && user.samlIdentifiers.length > 0) authMethods.push('saml')
-  if (availableAuthMethods.includes('oidc') && user.thirdPartyIdentifiers.length > 0) authMethods.push('oidc')
+  if (availableAuthMethods.includes('saml') && user.samlIdentifiers?.length > 0) authMethods.push('saml')
+  if (availableAuthMethods.includes('oidc') && user.thirdPartyIdentifiers?.length > 0) authMethods.push('oidc')
 // If none of the above, mark as LDAP
   if (availableAuthMethods.includes('ldap') && authMethods.length === 0 && user.loginCount !== 0) authMethods.push('ldap')
 
@@ -421,6 +427,7 @@ function _formatUserInfo(user, maxDate) {
     authMethods,
     allowUpdateDetails,
     allowUpdateIsAdmin,
+    aiFeatures: { enabled: user.aiFeatures?.enabled !== false },
     features: user.features && {
       collaborators: user.features.collaborators,
       compileTimeout: user.features.compileTimeout,
@@ -505,7 +512,7 @@ async function deleteUser(req, res, next) {
       skipEmail: !sendEmail,
     })
   } catch (err) {
-    logger.warn({ deleterUser, userId }, err.message)
+    logger.warn({ deleterUserId, userId }, err.message)
     if (toUserId) {
       try { // failed to delete user, try to transfer all projects back
         await OwnershipTransferHandler.promises.transferAllProjectsToUser({
@@ -534,9 +541,9 @@ async function purgeDeletedUser(req, res, next) {
 
   logger.debug({ deleterUserId, userId }, 'admin is trying to purge deleted user account')
   try {
-    UserDeleter.promises.expireDeletedUser(userId)
+    await UserDeleter.promises.expireDeletedUser(userId)
   } catch (err) {
-    logger.warn({ restorerId, userId }, err.message)
+    logger.warn({ deleterUserId, userId }, err.message)
     const message = 'Something went wrong. The user is already deleted?'
     return HttpErrorHandler.unprocessableEntity(req, res, message)
   }
@@ -565,6 +572,8 @@ async function restoreDeletedUser(req, res, next) {
     }
 
     userData.suspended = false
+    // users deleted before the analyticsId back-fill migration have no analyticsId
+    userData.analyticsId ??= userData._id.toString()
     await User.create(userData)
     await DeletedUser.deleteOne({ "user._id": userId })
 
@@ -603,6 +612,13 @@ async function updateUser(req, res, next) {
   const { body } = req
 
   const updatesInput = { ...body }
+  if (
+    'aiFeatures' in updatesInput &&
+    (typeof updatesInput.aiFeatures?.enabled !== 'boolean' ||
+      Object.keys(updatesInput.aiFeatures).some(key => key !== 'enabled'))
+  ) {
+    return HttpErrorHandler.unprocessableEntity(req, res, 'invalid_ai_features')
+  }
   if ('firstName' in updatesInput) {
     updatesInput.first_name = updatesInput.firstName
     delete updatesInput.firstName
@@ -622,7 +638,7 @@ async function updateUser(req, res, next) {
   let emailIsUpdated = false
   const newEmail = updatesInput.email?.trim().toLowerCase()
   if (newEmail != null && newEmail !== user.email) { // email is updated
-    if (newEmail.indexOf('@') === -1) {
+    if (!EmailHelper.parseEmail(newEmail)) {
       const message = req.i18n.translate('email_address_is_invalid')
       return HttpErrorHandler.unprocessableEntity(req, res, message)
     }
@@ -662,7 +678,7 @@ async function updateUser(req, res, next) {
         if ('collaborators' in features && (!Number.isInteger(features.collaborators) || features.collaborators < -1)) {
           return HttpErrorHandler.unprocessableEntity(req, res, 'invalid_collaborators')
         }
-        if ('compileTimeout' in features && (!Number.isInteger(features.compileTimeout) || features.compileTimeout <= 0)) {
+        if ('compileTimeout' in features && (!Number.isInteger(features.compileTimeout) || features.compileTimeout <= 0 || features.compileTimeout > 600)) {
           return HttpErrorHandler.unprocessableEntity(req, res, 'invalid_compile_timeout')
         }
       }
@@ -762,6 +778,24 @@ async function getAdditionalUserInfo(req, res, next) {
   res.json({ activationLink })
 }
 
+async function resetAiUsage(req, res) {
+  const { userId } = req.params
+  if (!(await User.exists({ _id: userId }))) {
+    return HttpErrorHandler.notFound(req, res)
+  }
+  await resetTokenUsage(userId)
+  res.json(await getTokenUsage(userId))
+}
+
+async function getAiUsage(req, res) {
+  const { userId } = req.params
+  if (!(await User.exists({ _id: userId }))) {
+    return HttpErrorHandler.notFound(req, res)
+  }
+  res.set('Cache-Control', 'no-store')
+  res.json(await getTokenUsage(userId))
+}
+
 async function getUsersJsonBySearch(req, res) {
   const { search } = req.body
   if (typeof search !== 'string' || search.trim() === '') {
@@ -778,6 +812,8 @@ export default {
   getUsersJson: expressify(getUsersJson),
   getUsersJsonBySearch: expressify(getUsersJsonBySearch),
   getAdditionalUserInfo: expressify(getAdditionalUserInfo),
+  resetAiUsage: expressify(resetAiUsage),
+  getAiUsage: expressify(getAiUsage),
   registerNewUser: expressify(registerNewUser),
   activateAccountPage: expressify(activateAccountPage),
   sendActivationEmail: expressify(sendActivationEmail),

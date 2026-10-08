@@ -1,51 +1,44 @@
-import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import { normalizeOverallTheme } from '../../infrastructure/OverallTheme.mjs'
 
-// Copied from services/web/frontend/js/features/ide-redesign/utils/new-editor-utils.ts
-const SPLIT_TEST_USER_CUTOFF_DATE = new Date(Date.UTC(2025, 8, 23, 13, 0, 0)) // 2pm British Summer Time on September 23, 2025
-const NEW_USER_CUTOFF_DATE = new Date(Date.UTC(2025, 10, 12, 12, 0, 0)) // 12pm GMT on November 12, 2025
-const VALID_OVERALL_THEMES = new Set(['', 'light-', 'system'])
-
-function normalizeOverallTheme(overallTheme) {
-  return VALID_OVERALL_THEMES.has(overallTheme) ? overallTheme : 'system'
+// Unset or unknown values fall back to `system`, regardless of sign-up date.
+function getOverallTheme(user) {
+  return normalizeOverallTheme(user.ace?.overallTheme)
 }
 
-async function getEnableNewEditorLegacyDefault(req, res, user) {
-  if (req.query['existing-user-override'] === 'true') {
-    return false
+/**
+ * Build the settings for a reference provider (zotero, mendeley, papers).
+ *
+ * The group entries are rebuilt explicitly so that the `_id` stored on older
+ * documents doesn't leak to the frontend, which posts these settings back to us
+ * unchanged.
+ *
+ * @param {object | undefined} settings the provider settings from `user.ace`
+ */
+function buildRefProviderSettings(settings) {
+  if (settings == null) {
+    return settings
   }
-
-  if (req.query['skip-new-user-check'] === 'true') {
-    return true
+  return {
+    enabled: settings.enabled,
+    disablePersonalLibrary: settings.disablePersonalLibrary,
+    groups: (settings.groups ?? []).map(group => ({ id: group.id })),
   }
-
-  if (user.signUpDate >= NEW_USER_CUTOFF_DATE) {
-    return true
-  }
-
-  if (user.signUpDate >= SPLIT_TEST_USER_CUTOFF_DATE) {
-    const assignment = await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'editor-redesign-new-users'
-    )
-
-    return assignment.variant !== 'default'
-  }
-
-  return false
 }
 
-async function buildUserSettings(req, res, user) {
-  const defaultLegacyEnableNewEditor = await getEnableNewEditorLegacyDefault(
-    req,
-    res,
-    user
-  )
+function getInitialTheme(overallThemeSetting) {
+  switch (overallThemeSetting) {
+    case 'light-':
+      return 'light'
+    case '':
+      return 'dark'
+    case 'system':
+      return 'system'
+    default:
+      return 'dark'
+  }
+}
 
-  const enableNewEditorStageFour = user.ace.enableNewEditorStageFour ?? true
-  const enableNewEditorLegacy =
-    user.ace.enableNewEditor ?? defaultLegacyEnableNewEditor
-
+async function buildUserSettings(_req, _res, user) {
   return {
     mode: user.ace.mode,
     editorTheme: user.ace.theme,
@@ -56,18 +49,24 @@ async function buildUserSettings(req, res, user) {
     autoPairDelimiters: user.ace.autoPairDelimiters,
     pdfViewer: user.ace.pdfViewer,
     syntaxValidation: user.ace.syntaxValidation,
+    previewTabs: user.ace.previewTabs ?? false,
     fontFamily: user.ace.fontFamily || 'lucida',
     lineHeight: user.ace.lineHeight || 'normal',
-    overallTheme: normalizeOverallTheme(user.ace?.overallTheme),
+    overallTheme: getOverallTheme(user),
     mathPreview: user.ace.mathPreview,
     breadcrumbs: user.ace.breadcrumbs,
+    editorTabs: user.ace.editorTabs ?? true,
+    nonBlinkingCursor: user.ace.nonBlinkingCursor ?? false,
     referencesSearchMode: user.ace.referencesSearchMode,
-    enableNewEditor: enableNewEditorStageFour,
-    enableNewEditorLegacy,
     darkModePdf: user.ace.darkModePdf ?? false,
+    floatingMenu: user.ace.floatingMenu ?? true,
+    zotero: buildRefProviderSettings(user.ace.zotero),
+    mendeley: buildRefProviderSettings(user.ace.mendeley),
+    papers: buildRefProviderSettings(user.ace.papers),
   }
 }
 
 export default {
   buildUserSettings,
+  getInitialTheme,
 }

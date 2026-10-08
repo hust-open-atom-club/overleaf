@@ -320,7 +320,9 @@
   #manage-projects-root,
   #manage-users-root,
   #template-gallery-root,
-  #template-root {
+  #template-root,
+  #library-root {
+    .website-redesign-navbar,
     .navbar-default {
       @include navbar-dark;
     }

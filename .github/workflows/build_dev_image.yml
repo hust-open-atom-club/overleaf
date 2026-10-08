@@ -38,14 +38,13 @@ jobs:
             filestore,
             document-updater,
             docstore,
-            contacts,
             chat,
             clsi,
           ]
         platform: [linux/amd64, linux/arm64]
         include:
           - platform: linux/amd64
-            runner: ubuntu-latest
+            runner: ubuntu-24.04
             platform_pair: amd64
           - platform: linux/arm64
             runner: ubuntu-24.04-arm
@@ -53,22 +52,33 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - name: "Checkout Current Repository"
-        uses: actions/checkout@main
+        uses: actions/checkout@v7
         with:
           ref: server-pro
       - name: "Setup node environment"
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: "22.x"
-      - name: "Sync package-lock.json"
+          node-version: "24.18.1"
+      - name: "Sync yarn.lock"
         run: |
-          npm install --package-lock-only --ignore-scripts
+          corepack enable
+          yarn install --mode=update-lockfile
       - name: "Login to GHCR"
-        uses: docker/login-action@v3.0.0
+        uses: docker/login-action@v4
         with:
-          registry: ${{ env.GHCR_REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{env.GHCR_REGISTRY}}
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      # OCI manifests are needed so the merged index can carry annotations
+      - name: Set up Docker (enable containerd image store)
+        uses: docker/setup-docker-action@v5
+        with:
+          daemon-config: |
+            {
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
       - name: Disable buildx default attestations
         run: |
           echo "BUILDX_NO_DEFAULT_ATTESTATIONS=1" >> $GITHUB_ENV
@@ -83,42 +93,44 @@ jobs:
           docker push ${{ env.GHCR_REGISTRY }}/m0rtzz/overleaf/dev:${{ matrix.image-name }}-${PLATFORM_PAIR}
 
   merge:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build-image
     strategy:
       fail-fast: false
       matrix:
-        image-name:
-          [
-            web,
-            webpack,
-            real-time,
-            project-history,
-            linked-url-proxy,
-            notifications,
-            history-v1,
-            filestore,
-            document-updater,
-            docstore,
-            contacts,
-            chat,
-            clsi,
-          ]
+        image-name: [
+          web,
+          webpack,
+          real-time,
+          project-history,
+          linked-url-proxy,
+          notifications,
+          history-v1,
+          filestore,
+          document-updater,
+          docstore,
+          chat,
+          clsi
+        ]
 
     steps:
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.GHCR_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Create and push manifest list (multi-arch tag)
         run: |
           docker buildx imagetools create \
+            --annotation "index:org.opencontainers.image.title=overleaf-pro-dev-${{ matrix.image-name }}" \
+            --annotation "index:org.opencontainers.image.description=Overleaf Pro development image for the ${{ matrix.image-name }} service, rebuilt nightly from server-pro." \
+            --annotation "index:org.opencontainers.image.source=https://github.com/M0rtzz/overleaf" \
+            --annotation "index:org.opencontainers.image.version=${{ github.sha }}" \
             -t ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }} \
             ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }}-amd64 \
             ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }}-arm64
@@ -128,14 +140,14 @@ jobs:
           docker buildx imagetools inspect ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }}
 
   clean-image:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: merge
     steps:
       - name: Delete old images
-        uses: snok/container-retention-policy@v2
+        uses: snok/container-retention-policy@v3.1.0
         with:
           image-names: overleaf/dev*
-          cut-off: 7 days ago UTC
-          account-type: personal
-          untagged-only: true
+          cut-off: 7d
+          account: user
+          tag-selection: untagged
           token: ${{ secrets.GHCR_PAT }}

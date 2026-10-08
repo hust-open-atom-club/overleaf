@@ -115,9 +115,11 @@ html(
 				'website-redesign': isWebsiteRedesign === true || websiteRedesignOverride,
 				'application-page': isApplicationPage,
 				'admin-panel-page': isAdminPanelPage,
+				'red-nav-bar-for-admins': !settings.isDevEnv && hasFeature('saas') && hasAdminAccess(),
 			},
 		]
 		data-theme=initialBodyTheme
+		data-initial-theme=initialTheme
 	)
 		if overallThemeSetting === 'system'
 			if ignoreThemeCookieForSystem
@@ -164,7 +166,7 @@ html(
 				defer=deferScripts
 			)
 
-		if typeof suppressSkipToContent == 'undefined'
+		if suppressSkipToContent === false || (typeof suppressSkipToContent == 'undefined' && typeof suppressNavbar == 'undefined')
 			a(class='skip-to-content' href='#main-content') #{translate('skip_to_content')}
 
 		block body

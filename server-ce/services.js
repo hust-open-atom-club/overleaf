@@ -21,9 +21,6 @@ module.exports = [
     name: 'chat',
   },
   {
-    name: 'contacts',
-  },
-  {
     name: 'notifications',
   },
   {
@@ -34,7 +31,7 @@ module.exports = [
   },
   {
     name: 'linked-url-proxy',
-  },
+  }
 ]
 
 if (require.main === module) {

@@ -8,24 +8,53 @@
 @import '../../../../frontend/stylesheets/helpers/all.scss';
 @import '../../../../frontend/stylesheets/components/all.scss';
 
-:root {
-  --ds-nav-active-bg: var(--bg-accent-03);
-  --ds-nav-active-color: var(--green-60);
-  --theme-toggle-selected-background: var(--green-20);
-  --ds-nav-content-bg-secondary: var(--bg-light-secondary);
+// ds-nav variables and theme toggle styles are provided by main-style.
 
-  @include theme('default') {
-    --ds-nav-active-bg: var(--green-70);
-    --ds-nav-active-color: var(--green-10);
-    --theme-toggle-selected-background: var(--green-70);
-    --ds-nav-content-bg-secondary: var(--bg-dark-secondary);
+// navbar-dark is scoped to project/library roots upstream; apply to admin roots too.
+@include theme('default') {
+  #manage-users-root,
+  #manage-projects-root {
+    .website-redesign-navbar,
+    .website-redesign .navbar-default {
+      @include navbar-dark;
+    }
   }
 }
 
-body {
-  --ds-nav-bg-color: var(--bg-primary-themed);
-  --ds-nav-hover-bg: var(--bg-secondary-themed);
-  --ds-nav-color: var(--content-secondary-themed);
+// thin footer is hardcoded light upstream; theme it for dark (Server Pro only).
+@include theme('default') {
+  .user-ds-nav-page footer.site-footer,
+  .project-ds-nav-page footer.site-footer {
+    --link-color: var(--link-web-dark);
+    --link-hover-color: var(--link-web-hover-dark);
+    --link-visited-color: var(--link-web-visited-dark);
+
+    background-color: var(--bg-dark-primary);
+    color: var(--content-secondary-dark);
+  }
+
+  .user-ds-nav-page {
+    @include dark-dropdown-menu;
+    @include form-check-dark;
+
+    .btn {
+      @include dark-buttons;
+    }
+
+    .table,
+    .table-container {
+      @include dark-table;
+    }
+
+    .form-control,
+    .form-control-wrapper {
+      @include dark-input;
+    }
+
+    .cookie-banner {
+      @include cookie-banner-dark;
+    }
+  }
 }
 
 .user-ds-nav-page {
@@ -33,6 +62,7 @@ body {
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
+  color-scheme: var(--ds-nav-color-scheme);
   color: var(--content-secondary-themed);
 
   // NOTE-AC: This code can be eliminated when we remove sidebar-navigation-ui-update
@@ -67,12 +97,12 @@ body {
     }
 
     @include media-breakpoint-down(lg) {
-      --navbar-hamburger-submenu-item-hover-color: var(--content-primary);
-      --navbar-hamburger-submenu-item-hover-bg: var(--bg-light-secondary);
-      --navbar-subdued-hover-color: var(--content-primary);
-      --navbar-link-hover-color: var(--content-primary);
-      --navbar-link-hover-bg: var(--bg-light-secondary);
-      --navbar-subdued-hover-bg: var(--bg-light-secondary);
+      --navbar-hamburger-submenu-item-hover-color: var(--content-primary-themed);
+      --navbar-hamburger-submenu-item-hover-bg: var(--bg-secondary-themed);
+      --navbar-subdued-hover-color: var(--content-primary-themed);
+      --navbar-link-hover-color: var(--content-primary-themed);
+      --navbar-link-hover-bg: var(--bg-secondary-themed);
+      --navbar-subdued-hover-bg: var(--bg-secondary-themed);
       --navbar-hamburger-submenu-bg: none;
 
       .nav-item-help::before {
@@ -153,7 +183,7 @@ body {
       }
 
       .user-list-sidebar-survey-link {
-        color: var(--ds-nav-color) !important;
+        color: var(--content-secondary-themed) !important;
       }
 
       .survey-notification {
@@ -194,7 +224,7 @@ body {
         > button {
           width: 100%;
           text-align: left;
-          color: var(--ds-nav-color);
+          color: var(--content-secondary-themed);
           background: none;
           border-radius: var(--border-radius-medium);
           border: none;
@@ -202,7 +232,7 @@ body {
         }
 
         &:hover button {
-          background-color: var(--ds-nav-hover-bg);
+          background-color: var(--bg-secondary-themed);
         }
 
         &.active button {
@@ -227,7 +257,7 @@ body {
         button.dropdown-toggle {
           border-radius: var(--border-radius-full);
           border: none;
-          color: var(--ds-nav-color);
+          color: var(--content-secondary-themed);
           height: 20px;
           width: 20px;
           padding: 0;
@@ -285,12 +315,12 @@ body {
 
         &:hover,
         &:focus {
-          background-color: #d9d9d9 !important;
+          background-color: rgb(var(--table-icon-bg-hover) / 8%) !important;
         }
       }
 
       .dash-cell-name a {
-        color: var(--content-primary-themed) !important;
+        color: var(--content-secondary-themed) !important;
       }
     }
 
@@ -319,6 +349,7 @@ body {
 
       .cookie-banner {
         position: static;
+        background-color: var(--bg-primary-themed);
 
         // Remove the parts of the shadow that stick out of the sides
         clip-path: inset(-13px 0 0 0);
@@ -329,9 +360,29 @@ body {
     }
   }
 
+  .ds-nav-ds-name {
+    margin-bottom: var(--spacing-05);
+
+    span {
+      text-transform: uppercase;
+      font-weight: bold;
+
+      @include body-xs;
+    }
+  }
+}
+
+.user-ds-nav-page,
+#manage-projects-root .project-ds-nav-page {
+  .theme-toggle-radio label {
+    display: flex;
+    margin-bottom: 0;
+    color: var(--content-primary-themed);
+  }
+
   .ds-nav-icon-dropdown {
     .dropdown-toggle {
-      color: var(--ds-nav-color);
+      color: var(--content-secondary-themed);
       background: none;
       height: 44px;
       width: 44px;
@@ -339,7 +390,7 @@ body {
       overflow: hidden;
 
       &:hover {
-        background-color: var(--ds-nav-hover-bg);
+        background-color: var(--bg-secondary-themed);
       }
 
       &.show {
@@ -362,68 +413,5 @@ body {
         vertical-align: middle;
       }
     }
-  }
-
-  .ds-nav-ds-name {
-    color: var(--ds-nav-color);
-    margin-bottom: var(--spacing-05);
-
-    span {
-      text-transform: uppercase;
-      font-weight: bold;
-
-      @include body-xs;
-    }
-  }
-}
-
-.user-ds-nav-page .theme-toggle {
-  display: flex;
-  justify-content: space-between;
-  cursor: default !important;
-  align-items: center;
-
-  &:hover {
-    background-color: transparent !important;
-    color: var(--content-primary-themed);
-  }
-
-  legend {
-    font-size: var(--font-size-02);
-    line-height: var(--line-height-02);
-    margin-bottom: 0;
-  }
-}
-
-.user-ds-nav-page .theme-toggle-radios {
-  display: flex;
-  border-radius: var(--border-radius-full);
-  background-color: var(--bg-secondary-themed);
-  padding: var(--spacing-01);
-  gap: var(--spacing-01);
-}
-
-.user-ds-nav-page .theme-toggle-radio {
-  display: flex;
-
-  input {
-    all: unset;
-  }
-
-  label {
-    display: flex;
-    padding: var(--spacing-03);
-    margin-bottom: 0;
-    border-radius: var(--border-radius-full);
-    cursor: pointer;
-    color: var(--content-primary-themed);
-  }
-
-  .material-symbols {
-    font-size: var(--font-size-03);
-  }
-
-  input:checked + label {
-    background-color: var(--theme-toggle-selected-background);
   }
 }

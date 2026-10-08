@@ -33,6 +33,19 @@ const {
 
 const userId = owner.id
 
+// The sidebar's trash page switcher and the per-row trash action buttons share
+// the accessible name "Trash", so pick the one outside the project table.
+function getSidebarTrashButton() {
+  const table = screen.getByRole('table')
+  return screen
+    .getAllByRole('button', { name: 'Trash' })
+    .filter(button => !table.contains(button))[0]
+}
+
+function getSidebarProjectsFilterButton() {
+  return screen.getAllByRole('button', { name: 'Projects' })[0]
+}
+
 describe('<ProjectListRoot />', function () {
   this.timeout('10s')
 
@@ -366,8 +379,7 @@ describe('<ProjectListRoot />', function () {
 
       describe('trashed projects', function () {
         beforeEach(function () {
-          const filterButton = screen.getAllByText('Trashed projects')[0]
-          fireEvent.click(filterButton)
+          fireEvent.click(getSidebarTrashButton())
 
           allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
           // + 1 because of select all
@@ -384,15 +396,14 @@ describe('<ProjectListRoot />', function () {
         })
 
         it('shows the download, archive, and restore buttons in top toolbar', function () {
-          expect(screen.queryByLabelText('Trash')).to.be.null
+          expect(within(actionsToolbar).queryByLabelText('Trash')).to.be.null
           within(actionsToolbar).queryByLabelText('Download')
           within(actionsToolbar).queryByLabelText('Archive')
           within(actionsToolbar).getByText('Restore') // no icon for this button
         })
 
         it('clears selected projects when filter changed', function () {
-          const filterButton = screen.getAllByText('All projects')[0]
-          fireEvent.click(filterButton)
+          fireEvent.click(getSidebarProjectsFilterButton())
 
           const allCheckboxes =
             screen.getAllByRole<HTMLInputElement>('checkbox')
@@ -699,7 +710,10 @@ describe('<ProjectListRoot />', function () {
             expect(screen.queryByText(p.name)).to.be.null
           })
 
-          const trashBtns = screen.getAllByRole('button', { name: 'Trash' })
+          const trashBtns = within(screen.getByRole('table')).getAllByRole(
+            'button',
+            { name: 'Trash' }
+          )
           for (const [index, trashBtn] of trashBtns.entries()) {
             fireEvent.click(trashBtn)
             fireEvent.click(
@@ -887,9 +901,7 @@ describe('<ProjectListRoot />', function () {
           assertToolbarButtonsExists()
 
           // select trashed projects
-          const [trashedProjectsButton] =
-            screen.getAllByText(/trashed projects/i)
-          fireEvent.click(trashedProjectsButton)
+          fireEvent.click(getSidebarTrashButton())
           fireEvent.click(tag)
 
           allCheckboxes = screen.getAllByRole('checkbox')
@@ -901,8 +913,7 @@ describe('<ProjectListRoot />', function () {
 
         describe('"More" dropdown', function () {
           beforeEach(async function () {
-            const filterButton = screen.getAllByText('All projects')[0]
-            fireEvent.click(filterButton)
+            fireEvent.click(getSidebarProjectsFilterButton())
             allCheckboxes = screen.getAllByRole<HTMLInputElement>('checkbox')
           })
 
@@ -939,7 +950,7 @@ describe('<ProjectListRoot />', function () {
               'project-list-page-interaction',
               {
                 action: 'rename',
-                page: '/',
+                page: '/project',
                 projectId: copyableProject.id,
                 isSmallDevice: true,
               }
@@ -1080,7 +1091,7 @@ describe('<ProjectListRoot />', function () {
               'project-list-page-interaction',
               {
                 action: 'clone',
-                page: '/',
+                page: '/project',
                 projectId: archiveableProject.id,
                 isSmallDevice: true,
               }
@@ -1245,7 +1256,7 @@ describe('<ProjectListRoot />', function () {
           'project-list-page-interaction',
           {
             action: 'clone',
-            page: '/',
+            page: '/project/shared',
             projectId: archiveableProject.id,
             isSmallDevice: true,
           }

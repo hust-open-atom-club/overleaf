@@ -120,10 +120,20 @@ export function UserListProvider({ children }: UserListProviderProps) {
 
   const { t } = useTranslation()
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
-  const filterTranslations = useMemo(
-    () => new Map(filterKeys.map(key => [key, capitalize(t(`${key}`))])),
-    [t]
-  )
+  const filterTranslations = useMemo(() => {
+    const labels: Record<Filter, string> = {
+      all: t('all'),
+      admin: t('admin'),
+      suspended: t('disabled'),
+      inactive: t('inactive'),
+      deleted: t('deleted_user'),
+      local: t('local'),
+      ldap: t('ldap'),
+      saml: t('saml'),
+      oidc: t('oidc'),
+    }
+    return new Map(filterKeys.map(key => [key, capitalize(labels[key])]))
+  }, [t])
 
   const [filter, setFilter] = usePersistedState<Filter>(
     'user-list-filter',
@@ -290,6 +300,9 @@ export function UserListProvider({ children }: UserListProviderProps) {
   )
 
   const updateUserViewData = useCallback((newUserData: User) => {
+    setSearchResults(users =>
+      users?.map(user => user.id === newUserData.id ? newUserData : user) ?? null
+    )
     setLoadedUsers(loadedUsers => {
       return loadedUsers.map(u =>
         u.id === newUserData.id ? { ...newUserData } : u
@@ -298,6 +311,9 @@ export function UserListProvider({ children }: UserListProviderProps) {
   }, [])
 
   const removeUserFromView = useCallback((user: User) => {
+    setSearchResults(users =>
+      users?.filter(u => u.id !== user.id) ?? null
+    )
     setLoadedUsers(loadedUsers => {
       return loadedUsers.filter(u => u.id !== user.id)
     })

@@ -22,6 +22,7 @@ import CookieBanner from '@/shared/components/cookie-banner'
 import useThemedPage from '@/shared/hooks/use-themed-page'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
+import { TutorialProvider } from '@/shared/context/tutorial-context'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -38,9 +39,11 @@ export function ProjectListRootInner() {
     <ProjectListProvider>
       <ColorPickerProvider>
         <SplitTestProvider>
-          <UserSettingsProvider>
-            <ProjectListPageContent />
-          </UserSettingsProvider>
+          <TutorialProvider>
+            <UserSettingsProvider>
+              <ProjectListPageContent />
+            </UserSettingsProvider>
+          </TutorialProvider>
         </SplitTestProvider>
       </ColorPickerProvider>
     </ProjectListProvider>
@@ -81,12 +84,12 @@ function DefaultPageContentWrapper({ children }: { children: ReactNode }) {
 }
 
 function ProjectListPageContent() {
-  useThemedPage('themed-project-dashboard')
+  useThemedPage()
   const { totalProjectsCount, isLoading, loadProgress } =
     useProjectListContext()
 
   useEffect(() => {
-    eventTracking.sendMB('loads_v2_dash', {})
+    eventTracking.sendMB('loads_v2_dash', { page: 'projects' })
   }, [])
 
   const { t } = useTranslation()
