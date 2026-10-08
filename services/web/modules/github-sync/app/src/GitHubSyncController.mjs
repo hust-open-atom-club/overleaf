@@ -11,6 +11,23 @@ import api from './GitHubApiClient.mjs'
 import { doGitMerge } from './GitMerge.mjs'
 import { InvalidTokenError, GitNotLinkedError } from './GitSyncErrors.mjs'
 
+function isValidGitHubRepoName(name) {
+  if (typeof name !== 'string') {
+    return false
+  }
+
+  const trimmed = name.trim()
+
+  return (
+    trimmed.length > 0 &&
+    trimmed.length <= 100 &&
+    /^[A-Za-z0-9._-]+$/.test(trimmed) &&
+    !trimmed.startsWith('.') &&
+    !trimmed.endsWith('.') &&
+    !trimmed.endsWith('.git')
+  )
+}
+
 async function getConnectionStatus(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
 
@@ -175,9 +192,22 @@ async function unlink(req, res) {
 async function exportProject(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const { project_id: projectId } = req.params
+  const { name } = req.body
+  const normalizedName = typeof name === 'string' ? name.trim() : name
+
+  if (!isValidGitHubRepoName(normalizedName)) {
+    return res.status(400).json({
+      key: 'github_validation_check',
+      message:
+        'Invalid GitHub repository name. It must be 1-100 characters long and use only letters, numbers, periods (.), underscores (_), or hyphens (-). Do not include spaces or end with ".git".',
+    })
+  }
 
   try {
-    await GitHubSyncHandler.exportProject(userId, projectId, req.body)
+    await GitHubSyncHandler.exportProject(userId, projectId, {
+      ...req.body,
+      name: normalizedName,
+    })
 
   } catch (err) {
     const info = OError.getFullInfo(err)
