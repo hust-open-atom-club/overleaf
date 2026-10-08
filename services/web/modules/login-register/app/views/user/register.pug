@@ -20,7 +20,7 @@ block content
 									.notification-content-and-cta
 										.notification-content.text-left(style='font-family: Lato, sans-serif;')
 											p Registration requires a Chinese education email (email@*.edu.cn) and an invitation code.
-											p Need help or a free code? Contact #[a(href='mailto:' + process.env.OVERLEAF_ADMIN_EMAIL style='color: #098842;')= process.env.OVERLEAF_ADMIN_EMAIL].
+											p Need help or a free code? Contact #[a(href='mailto:' + process.env.OVERLEAF_ADMIN_EMAIL style='color: var(--green-50);')= process.env.OVERLEAF_ADMIN_EMAIL].
 							form(
 								data-ol-async-form
 								name='registerForm'
@@ -36,7 +36,7 @@ block content
 									.notification-content.text-left(style='font-family: Lato, sans-serif;')
 										p Your account activation email has been sent. Please check your inbox and follow the instructions to complete activation.
 										p If you don't see the email in your inbox, please check your spam folder first.
-										p If you still can't locate it or encounter other issues, contact me at #[a(href='mailto:' + process.env.OVERLEAF_ADMIN_EMAIL style='color: #098842;')= process.env.OVERLEAF_ADMIN_EMAIL].
+										p If you still can't locate it or encounter other issues, contact me at #[a(href='mailto:' + process.env.OVERLEAF_ADMIN_EMAIL style='color: var(--green-50);')= process.env.OVERLEAF_ADMIN_EMAIL].
 										p(style='font-weight: bold; font-style: italic;') The activation link will expire in one week, after which you'll need to register again.
 								div(data-ol-not-sent)
 									+formMessages()

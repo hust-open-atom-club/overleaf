@@ -98,7 +98,7 @@ form[name='loginForm'] {
     a:not(.btn):hover,
     a:not(.btn):focus,
     a:not(.btn):active {
-      color: #098842;
+      color: var(--green-50);
       text-decoration-color: currentColor;
     }
   }
@@ -169,7 +169,7 @@ form[name='loginForm'] {
     a:not(.btn):hover,
     a:not(.btn):focus,
     a:not(.btn):active {
-      color: #098842;
+      color: var(--green-50);
       text-decoration-color: currentColor;
     }
   }
@@ -181,7 +181,7 @@ form[name='loginForm'] {
   a.auth-theme-password-reset-link:not(.btn),
   a.auth-theme-password-reset-link:not(.btn):hover,
   a.auth-theme-password-reset-link:not(.btn):focus {
-    color: #098842;
+    color: var(--green-50);
   }
 }
 

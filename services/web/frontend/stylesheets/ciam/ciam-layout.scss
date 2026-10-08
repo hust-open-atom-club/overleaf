@@ -119,7 +119,7 @@
     a:not(.btn):hover,
     a:not(.btn):focus,
     a:not(.btn):active {
-      color: #098842;
+      color: var(--green-50);
       text-decoration-color: currentColor;
     }
   }
