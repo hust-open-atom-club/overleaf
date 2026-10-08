@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useState, useEffect } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import useAsync from '@/shared/hooks/use-async'
 import { debugConsole } from '@/utils/debugging'
 import {
@@ -27,6 +27,21 @@ type OrgsResponse = {
   orgs: string[]
 }
 
+// GitHub repository names are 1-100 characters of letters, numbers, `.`, `_`
+// and `-`. They cannot start or end with a period, or end with `.git`.
+function isValidGitHubRepoName(name: string) {
+  const trimmed = name.trim()
+
+  return (
+    trimmed.length > 0 &&
+    trimmed.length <= 100 &&
+    /^[A-Za-z0-9._-]+$/.test(trimmed) &&
+    !trimmed.startsWith('.') &&
+    !trimmed.endsWith('.') &&
+    !trimmed.endsWith('.git')
+  )
+}
+
 type GitSyncExportModalProps = {
   projectId: string
   projectName: string
@@ -44,6 +59,7 @@ const GitSyncExportModal = ({
 
   const [selectedOwner, setSelectedOwner] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [submitErrorMessage, setSubmitErrorMessage] = useState<ReactNode>('')
   const [repoName, setRepoName] = useState(projectName)
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<'public' | 'private'>('private')
@@ -60,7 +76,7 @@ const GitSyncExportModal = ({
       .catch(err => debugConsole.error(err?.data?.message || err?.message || err))
   }, [])
 
-  const { isLoading, error, setError, runAsync } = useAsync<void>()
+  const { isLoading, runAsync } = useAsync<void>()
 
   // Static mapping of the error keys, for i18n.
   const GITHUB_ERROR_MESSAGES: Record<string, string> = {
@@ -70,10 +86,23 @@ const GitSyncExportModal = ({
   const createRepo = () => {
     const isPublic = visibility === 'public'
     const org = selectedOwner === userAndOrgs?.user ? undefined : selectedOwner
+    const normalizedRepoName = repoName.trim()
+
+    setSubmitErrorMessage('')
+
+    if (!isValidGitHubRepoName(normalizedRepoName)) {
+      setSubmitErrorMessage(
+        t('github_repository_name_invalid', {
+          defaultValue:
+            'Invalid GitHub repository name. It must be 1-100 characters long and use only letters, numbers, periods (.), underscores (_), or hyphens (-). Do not include spaces or end with ".git".',
+        })
+      )
+      return
+    }
 
     runAsync(postJSON(`/project/${projectId}/github-sync/export`, {
       body: {
-        name: repoName,
+        name: normalizedRepoName,
         description,
         isPublic,
         org,
@@ -82,10 +111,33 @@ const GitSyncExportModal = ({
       .then(() => setModalStatus('loading'))
       .catch(err => {
         debugConsole.error(err?.data?.message || err?.message || err)
-        setError(
-          GITHUB_ERROR_MESSAGES[err?.data?.key] ??
-            t('something_went_wrong_server')
-        )
+        const message = String(err?.data?.message || err?.message || '')
+        if (
+          err?.response?.status === 422 &&
+          message.toLowerCase().includes('already exists')
+        ) {
+          const repoUrl = `https://github.com/${selectedOwner}/${normalizedRepoName}`
+          setSubmitErrorMessage(
+            <>
+              A GitHub repository with this name already exists in the selected
+              account or organization:{' '}
+              <a
+                href={repoUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="github-sync-modal-link"
+              >
+                {selectedOwner}/{normalizedRepoName}
+              </a>
+              .
+            </>
+          )
+        } else {
+          setSubmitErrorMessage(
+            GITHUB_ERROR_MESSAGES[err?.data?.key] ??
+              t('something_went_wrong_server')
+          )
+        }
       })
   }
 
@@ -95,11 +147,11 @@ const GitSyncExportModal = ({
         <h4>{t('export_project_to_github')}</h4>
         <p>{t('project_not_linked_to_github')}</p>
 
-        {error && (
+        {submitErrorMessage && (
           <div className="notification-list">
             <Notification
               type="error"
-              content={error}
+              content={submitErrorMessage}
             />
           </div>
         )}
