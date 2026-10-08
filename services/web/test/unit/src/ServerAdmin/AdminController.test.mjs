@@ -26,6 +26,8 @@ describe('AdminController', function () {
       promises: { hooks: { fire: sinon.stub().resolves([null]) } },
     }
     ctx.Features = { hasFeature: sinon.stub().returns(false) }
+    ctx.SessionManager = { getLoggedInUserId: sinon.stub().returns(null) }
+    ctx.User = { findById: sinon.stub() }
 
     vi.doMock('@overleaf/settings', () => ({ default: ctx.Settings }))
     vi.doMock(
@@ -53,6 +55,11 @@ describe('AdminController', function () {
     vi.doMock('../../../../app/src/infrastructure/Features', () => ({
       default: ctx.Features,
     }))
+    vi.doMock(
+      '../../../../app/src/Features/Authentication/SessionManager',
+      () => ({ default: ctx.SessionManager })
+    )
+    vi.doMock('../../../../app/src/models/User', () => ({ User: ctx.User }))
 
     ctx.controller = (await import(modulePath)).default
     ctx.req = new MockRequest(vi)
@@ -67,6 +74,33 @@ describe('AdminController', function () {
     it('should render the admin page', async function (ctx) {
       await ctx.controller.index(ctx.req, ctx.res, ctx.next)
       ctx.res.render.calledWith('admin/index').should.equal(true)
+    })
+
+    it('should default to the system theme when nobody is logged in', async function (ctx) {
+      await ctx.controller.index(ctx.req, ctx.res, ctx.next)
+      ctx.User.findById.called.should.equal(false)
+      ctx.res.render
+        .calledWithMatch('admin/index', {
+          overallThemeOverride: 'system',
+          ignoreOverallThemeCookie: true,
+        })
+        .should.equal(true)
+    })
+
+    it("should use the logged-in admin's overall theme", async function (ctx) {
+      ctx.SessionManager.getLoggedInUserId.returns('admin-user-id')
+      ctx.User.findById.returns({
+        lean: () => ({
+          exec: sinon.stub().resolves({ ace: { overallTheme: 'light-' } }),
+        }),
+      })
+      await ctx.controller.index(ctx.req, ctx.res, ctx.next)
+      ctx.res.render
+        .calledWithMatch('admin/index', {
+          overallThemeOverride: 'light-',
+          ignoreOverallThemeCookie: true,
+        })
+        .should.equal(true)
     })
 
     it('should include debug projects when saas is enabled', async function (ctx) {

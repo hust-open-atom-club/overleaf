@@ -12,7 +12,7 @@ describe('UserSettingsHelper', function () {
     it('should return the overall theme if set', async function (ctx) {
       const user = {
         ace: {
-          overallTheme: 'light',
+          overallTheme: 'light-',
         },
         signUpDate: new Date('2022-01-01'),
       }
@@ -23,7 +23,7 @@ describe('UserSettingsHelper', function () {
         user
       )
 
-      expect(settings.overallTheme).toBe('light')
+      expect(settings.overallTheme).toBe('light-')
     })
 
     it('should return system for new users with no overall theme set', async function (ctx) {
@@ -41,7 +41,8 @@ describe('UserSettingsHelper', function () {
       expect(settings.overallTheme).toBe('system')
     })
 
-    it('should return dark for old users with no overall theme set', async function (ctx) {
+    // This fork defaults every user to the system theme, regardless of sign-up date.
+    it('should return system for old users with no overall theme set', async function (ctx) {
       const user = {
         ace: {},
         signUpDate: new Date('2025-02-15T00:00:00Z'),
@@ -53,7 +54,22 @@ describe('UserSettingsHelper', function () {
         user
       )
 
-      expect(settings.overallTheme).toBe('')
+      expect(settings.overallTheme).toBe('system')
+    })
+
+    it('should fall back to system for an unknown overall theme', async function (ctx) {
+      const user = {
+        ace: { overallTheme: 'not-a-theme' },
+        signUpDate: new Date('2022-01-01'),
+      }
+
+      const settings = await ctx.UserSettingsHelper.buildUserSettings(
+        ctx.req,
+        ctx.res,
+        user
+      )
+
+      expect(settings.overallTheme).toBe('system')
     })
   })
 

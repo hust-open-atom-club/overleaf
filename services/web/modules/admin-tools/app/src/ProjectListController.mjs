@@ -43,13 +43,8 @@ async function manageProjectsPage(req, res, next) {
     status: prefetchedProjectsBlob ? 'success' : 'error',
   })
 
-  const userId = SessionManager.getLoggedInUserId(req.session)
-  const user = await User.findById(userId, 'ace')
-  const userSettings = await UserSettingsHelper.buildUserSettings(req, res, user)
-
   res.render(Path.resolve(__dirname, '../views/manage-projects-react'), {
     title: 'Manage Projects',
-    userSettings,
     prefetchedProjectsBlob,
     userSettings,
     ignoreOverallThemeCookie: true,

@@ -106,12 +106,8 @@ async function manageUsersPage(req, res, next) {
     status: prefetchedUsersBlob ? 'success' : 'error',
   })
 
-  const user = await User.findById(userId, 'ace')
-  const userSettings = await UserSettingsHelper.buildUserSettings(req, res, user)
-
   res.render(Path.resolve(__dirname, '../views/manage-users-react'), {
     title: 'Manage Users',
-    userSettings,
     prefetchedUsersBlob,
     availableAuthMethods,
     userDetailsUpdatedOnLogin,
