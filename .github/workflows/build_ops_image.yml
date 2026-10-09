@@ -2,7 +2,7 @@
 # This workflow is used to build overleaf image automatically
 #
 # Published at:
-#     ghcr.io/m0rtzz/overleaf/ops
+#     ghcr.io/hust-open-atom-club/overleaf/ops
 #
 # ---------------------------------
 
@@ -25,7 +25,7 @@ permissions:
   packages: write
 env:
   DOCKER_REGISTRY: ghcr.io
-  IMAGE_NAME: m0rtzz/overleaf
+  IMAGE_NAME: hust-open-atom-club/overleaf
 
 jobs:
   build-image:
@@ -57,7 +57,7 @@ jobs:
           else
             echo "No locale patch directory found; skipping"
           fi
-          docker run --rm -v "$(pwd)/services/web/":/overleaf/services/web -w /overleaf/services/web ghcr.io/m0rtzz/overleaf/dev:webpack yarn run extract-translations
+          docker run --rm -v "$(pwd)/services/web/":/overleaf/services/web -w /overleaf/services/web ghcr.io/hust-open-atom-club/overleaf/dev:webpack yarn run extract-translations
           cd ./server-ce/
           cp .dockerignore ../
 
@@ -112,7 +112,7 @@ jobs:
           tags: |
             sharelatex/sharelatex:latest
           labels: |
-            com.m0rtzz.overleaf.ops.revision=${{ steps.vars.outputs.MONOREPO_REVISION }}
+            club.openatom.hust.overleaf.ops.revision=${{ steps.vars.outputs.MONOREPO_REVISION }}
           # We don't want -${{ github.ref_name }} limit, just more cache hit
           no-cache: ${{ inputs.no_cache || false }}
           cache-from: type=gha,scope=ops
@@ -142,6 +142,6 @@ jobs:
         with:
           image-names: overleaf/ops*
           cut-off: 7d
-          account: user
+          account: hust-open-atom-club
           tag-selection: both
           token: ${{ secrets.GHCR_PAT }}

@@ -3,7 +3,7 @@
 # and push them to GitHub Container Registry
 #
 # Published at:
-#     ghcr.io/m0rtzz/overleaf/dev
+#     ghcr.io/hust-open-atom-club/overleaf/dev
 #
 # ---------------------------------
 
@@ -89,8 +89,8 @@ jobs:
           export BUILDX_NO_DEFAULT_ATTESTATIONS=1
           cd ./develop/
           bin/build ${{ matrix.image-name }}
-          docker tag develop-${{ matrix.image-name }}:latest ${{ env.GHCR_REGISTRY }}/m0rtzz/overleaf/dev:${{ matrix.image-name }}-${PLATFORM_PAIR}
-          docker push ${{ env.GHCR_REGISTRY }}/m0rtzz/overleaf/dev:${{ matrix.image-name }}-${PLATFORM_PAIR}
+          docker tag develop-${{ matrix.image-name }}:latest ${{ env.GHCR_REGISTRY }}/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }}-${PLATFORM_PAIR}
+          docker push ${{ env.GHCR_REGISTRY }}/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }}-${PLATFORM_PAIR}
 
   merge:
     runs-on: ubuntu-24.04
@@ -129,15 +129,15 @@ jobs:
           docker buildx imagetools create \
             --annotation "index:org.opencontainers.image.title=overleaf-pro-dev-${{ matrix.image-name }}" \
             --annotation "index:org.opencontainers.image.description=Overleaf Pro development image for the ${{ matrix.image-name }} service, rebuilt nightly from server-pro." \
-            --annotation "index:org.opencontainers.image.source=https://github.com/M0rtzz/overleaf" \
+            --annotation "index:org.opencontainers.image.source=https://github.com/hust-open-atom-club/overleaf" \
             --annotation "index:org.opencontainers.image.version=${{ github.sha }}" \
-            -t ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }} \
-            ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }}-amd64 \
-            ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }}-arm64
+            -t ghcr.io/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }} \
+            ghcr.io/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }}-amd64 \
+            ghcr.io/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }}-arm64
 
       - name: Inspect manifest
         run: |
-          docker buildx imagetools inspect ghcr.io/m0rtzz/overleaf/dev:${{ matrix.image-name }}
+          docker buildx imagetools inspect ghcr.io/hust-open-atom-club/overleaf/dev:${{ matrix.image-name }}
 
   clean-image:
     runs-on: ubuntu-24.04
@@ -148,6 +148,6 @@ jobs:
         with:
           image-names: overleaf/dev*
           cut-off: 7d
-          account: user
+          account: hust-open-atom-club
           tag-selection: untagged
           token: ${{ secrets.GHCR_PAT }}

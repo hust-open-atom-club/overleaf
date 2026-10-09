@@ -3,7 +3,7 @@
 # and push them to GitHub Container Registry
 #
 # Published at:
-#     ghcr.io/m0rtzz/overleaf
+#     ghcr.io/hust-open-atom-club/overleaf
 #
 # ---------------------------------
 
@@ -19,7 +19,7 @@ permissions:
 
 env:
   GHCR_REGISTRY: ghcr.io
-  REGISTRY_IMAGE: ghcr.io/m0rtzz/overleaf
+  REGISTRY_IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
   build:
@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: Get latest release branch
         run: |
-          echo "LATEST_RELEASE_REF=$(git ls-remote --heads --sort='version:refname' https://github.com/m0rtzz/overleaf.git 'release-v*' | tail -n1 | cut -d/ -f3)" >> $GITHUB_ENV
+          echo "LATEST_RELEASE_REF=$(git ls-remote --heads --sort='version:refname' https://github.com/hust-open-atom-club/overleaf.git 'release-v*' | tail -n1 | cut -d/ -f3)" >> $GITHUB_ENV
       - name: "Checkout Repository"
         uses: actions/checkout@v7
         with:
@@ -81,7 +81,7 @@ jobs:
           else
             echo "No locale patch directory found; skipping"
           fi
-          docker run --rm -v "$(pwd)/services/web/":/overleaf/services/web -w /overleaf/services/web ghcr.io/m0rtzz/overleaf/dev:webpack yarn run extract-translations
+          docker run --rm -v "$(pwd)/services/web/":/overleaf/services/web -w /overleaf/services/web ghcr.io/hust-open-atom-club/overleaf/dev:webpack yarn run extract-translations
           cd ./server-ce/
           cp .dockerignore ../
 
@@ -193,7 +193,7 @@ jobs:
         with:
           image-names: overleaf
           cut-off: 1s
-          account: user
+          account: hust-open-atom-club
           tag-selection: untagged
           token: ${{ secrets.GHCR_PAT }}
 
@@ -210,7 +210,7 @@ jobs:
     steps:
       - name: Get latest release branch
         run: |
-          echo "LATEST_RELEASE_REF=$(git ls-remote --heads --sort='version:refname' https://github.com/m0rtzz/overleaf.git 'release-v*' | tail -n1 | cut -d/ -f3)" >> $GITHUB_ENV
+          echo "LATEST_RELEASE_REF=$(git ls-remote --heads --sort='version:refname' https://github.com/hust-open-atom-club/overleaf.git 'release-v*' | tail -n1 | cut -d/ -f3)" >> $GITHUB_ENV
       - name: "Checkout Repository"
         uses: actions/checkout@v7
         with:
@@ -335,6 +335,6 @@ jobs:
         with:
           image-names: overleaf/git-bridge
           cut-off: 1s
-          account: user
+          account: hust-open-atom-club
           tag-selection: untagged
           token: ${{ secrets.GHCR_PAT }}
