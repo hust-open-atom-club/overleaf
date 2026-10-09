@@ -3,8 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const insertOne = vi.fn()
 const findOne = vi.fn()
 const createSecret = vi.fn()
+const hashSecret = vi.fn()
 
-vi.mock('../../../../app/src/infrastructure/mongodb.mjs', () => ({
+vi.mock('../../../../../app/src/infrastructure/mongodb.mjs', () => ({
   db: {
     oauthAccessTokens: {
       insertOne,
@@ -15,10 +16,11 @@ vi.mock('../../../../app/src/infrastructure/mongodb.mjs', () => ({
 vi.mock('../../../app/src/SecretsHelper.mjs', () => ({
   default: {
     createSecret,
+    hashSecret,
   },
 }))
 
-vi.mock('../../../../app/src/models/OauthApplication.mjs', () => ({
+vi.mock('../../../../../app/src/models/OauthApplication.mjs', () => ({
   OauthApplication: {
     findOne,
   },
@@ -30,6 +32,8 @@ describe('OAuthPersonalAccessTokenManager', function () {
     findOne.mockReset()
     createSecret.mockReset()
     createSecret.mockReturnValue('abcdefghijklmnopqrstuvwxzy1234567890')
+    hashSecret.mockReset()
+    hashSecret.mockImplementation(secret => `hashed:${secret}`)
     findOne.mockReturnValue({
       lean: () => ({
         exec: () => Promise.resolve({ _id: 'git-bridge-app-id' }),

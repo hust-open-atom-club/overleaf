@@ -794,13 +794,15 @@ describe('UserController', function () {
         })
         ctx.res.sendStatus = code => {
           code.should.equal(200)
-          ctx.SessionManager.setInSessionUser
-            .calledWith(ctx.req.session, {
+          ctx.SessionManager.setInSessionUser.should.have.been.calledWith(
+            ctx.req.session,
+            sinon.match({
               email: ctx.newEmail,
               first_name: undefined,
               last_name: undefined,
+              ace: sinon.match({ overallTheme: 'system' }),
             })
-            .should.equal(true)
+          )
           resolve()
         }
         ctx.UserController.updateUserSettings(ctx.req, ctx.res)
@@ -912,10 +914,15 @@ describe('UserController', function () {
         ctx.req.session.destroy = sinon.stub().callsArgWith(0)
         ctx.res.redirect = url => {
           url.should.equal('/login')
-          ctx.res.cookie.should.have.been.calledWith('ol-overallTheme', 'light-', {
-            maxAge: 365 * 24 * 60 * 60 * 1000,
-            sameSite: 'lax',
-          })
+          ctx.res.cookie.should.have.been.calledWith(
+            'ol-overallTheme',
+            'light-',
+            sinon.match({
+              maxAge: 365 * 24 * 60 * 60 * 1000,
+              path: '/',
+              sameSite: 'lax',
+            })
+          )
           resolve()
         }
 
@@ -929,10 +936,15 @@ describe('UserController', function () {
         ctx.req.session.destroy = sinon.stub().callsArgWith(0)
         ctx.res.redirect = url => {
           url.should.equal('/login')
-          ctx.res.cookie.should.have.been.calledWith('ol-overallTheme', 'dark', {
-            maxAge: 365 * 24 * 60 * 60 * 1000,
-            sameSite: 'lax',
-          })
+          ctx.res.cookie.should.have.been.calledWith(
+            'ol-overallTheme',
+            'dark',
+            sinon.match({
+              maxAge: 365 * 24 * 60 * 60 * 1000,
+              path: '/',
+              sameSite: 'lax',
+            })
+          )
           resolve()
         }
 

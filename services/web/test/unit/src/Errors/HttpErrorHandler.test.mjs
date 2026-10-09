@@ -105,6 +105,7 @@ describe('HttpErrorHandler', function () {
       expect(ctx.res.renderedVariables).to.deep.equal({
         title: 'Client Error',
         message: 'an error',
+        overallThemeOverride: 'system',
       })
     })
 
@@ -115,6 +116,7 @@ describe('HttpErrorHandler', function () {
       expect(ctx.res.renderedVariables).to.deep.equal({
         title: 'Client Error',
         message: undefined,
+        overallThemeOverride: 'system',
       })
     })
 
@@ -211,6 +213,7 @@ describe('HttpErrorHandler', function () {
       expect(ctx.res.renderedTemplate).to.equal('general/closed')
       expect(ctx.res.renderedVariables).to.deep.equal({
         title: 'maintenance',
+        bodyClasses: ['sessions-page'],
         overallThemeOverride: 'light-',
       })
     })
@@ -223,6 +226,7 @@ describe('HttpErrorHandler', function () {
       expect(ctx.res.renderedTemplate).to.equal('general/closed')
       expect(ctx.res.renderedVariables).to.deep.equal({
         title: 'maintenance',
+        bodyClasses: ['sessions-page'],
         overallThemeOverride: 'system',
       })
     })
@@ -245,6 +249,7 @@ describe('HttpErrorHandler', function () {
       expect(ctx.res.renderedTemplate).to.equal('general/404')
       expect(ctx.res.renderedVariables).to.deep.equal({
         title: 'page_not_found',
+        overallThemeOverride: 'system',
       })
     })
 
@@ -314,10 +319,13 @@ describe('HttpErrorHandler', function () {
 
       it("should render a template when content-type is 'html'", function (ctx) {
         ctx.req.accepts = () => 'html'
-        ctx.HttpErrorHandler.legacyInternal(ctx.req, ctx.res, new Error())
+        const error = new Error()
+        ctx.HttpErrorHandler.legacyInternal(ctx.req, ctx.res, error)
         expect(ctx.res.renderedTemplate).to.equal('general/500')
         expect(ctx.res.renderedVariables).to.deep.equal({
           title: 'Server Error',
+          message: error,
+          overallThemeOverride: 'system',
         })
       })
 

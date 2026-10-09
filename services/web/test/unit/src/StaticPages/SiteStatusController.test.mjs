@@ -1,4 +1,4 @@
-import { expect, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 
@@ -57,6 +57,9 @@ describe('SiteStatusController', function () {
     ctx.SessionManager = {
       getSessionUser: vi.fn().mockReturnValue(null),
     }
+    ctx.SystemMessageManager = {
+      getMessages: vi.fn().mockReturnValue([]),
+    }
     ctx.getSiteStatusHealthSnapshot = vi
       .fn()
       .mockResolvedValue(
@@ -77,6 +80,13 @@ describe('SiteStatusController', function () {
       '../../../../app/src/Features/Authentication/SessionManager',
       () => ({
         default: ctx.SessionManager,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/SystemMessages/SystemMessageManager',
+      () => ({
+        default: ctx.SystemMessageManager,
       })
     )
 
@@ -107,7 +117,7 @@ describe('SiteStatusController', function () {
     expect(
       ctx.res.renderedVariables.siteStatus.services.map(service => service.label)
     ).to.deep.equal(['Operational', 'Operational', 'Operational'])
-    expect(ctx.next).not.to.have.been.called
+    expect(ctx.next).not.toHaveBeenCalled()
   })
 
   it('shows health checks unavailable when smoke tests are not configured', async function (ctx) {
