@@ -258,11 +258,22 @@ async function getUserAndOrgs(token) {
   }
 }
 
-function getPushPermission(token, repoFullName) {
+// Current data of a repository. GitHub redirects a request for a renamed or
+// transferred repository to its new location, so `fullName` can differ from
+// the name that was asked for.
+function getRepoInfo(token, repoFullName) {
   return fetchGitHubJson(`${GITHUB_API_BASE}/repos/${repoFullName}`, {
     headers: buildHeaders(token),
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-  }, 'getPushPrmission').then(repo => (repo.permissions?.push === true))
+  }, 'getRepoInfo').then(repo => ({
+    fullName: repo.full_name,
+    defaultBranchName: repo.default_branch,
+    canPush: repo.permissions?.push === true,
+  }))
+}
+
+function getPushPermission(token, repoFullName) {
+  return getRepoInfo(token, repoFullName).then(repo => repo.canPush)
 }
 
 // repos
@@ -485,6 +496,7 @@ export default {
   revokeToken,
   getUser,
   getUserAndOrgs,
+  getRepoInfo,
   getPushPermission,
   createRepo,
   listUserRepos,

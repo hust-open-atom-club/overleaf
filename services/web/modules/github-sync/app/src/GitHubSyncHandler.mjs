@@ -36,9 +36,41 @@ async function getGitConnState(userId) {
   }
 }
 
+// The repository name and the default branch are stored when the project is
+// linked. Pick up a rename, a transfer or a new default branch from the Git
+// server, so that later syncs and the links in the panel use the current values.
+async function refreshRepoMetadata(projectId, pss, repoInfo) {
+  const update = {}
+  if (repoInfo.fullName && repoInfo.fullName !== pss.repoFullName) {
+    update.repoFullName = repoInfo.fullName
+  }
+  if (
+    repoInfo.defaultBranchName &&
+    repoInfo.defaultBranchName !== pss.defaultBranchName
+  ) {
+    update.defaultBranchName = repoInfo.defaultBranchName
+  }
+  if (Object.keys(update).length === 0) return
+
+  try {
+    await SyncStateManager.updateProjectState(projectId, update)
+    Object.assign(pss, update)
+    logger.debug({ projectId, update }, 'refreshed repository metadata')
+  } catch (err) {
+    // keep serving the stored values, the next request will try again
+    logger.warn({ err, projectId, update }, 'failed to refresh repository metadata')
+  }
+}
+
 async function getProjectState(userId, projectId) {
   let pss = null
-  const projection = { _id: 0, mergeStatus: 1, repoFullName: 1, unmergedBranchName: 1 }
+  const projection = {
+    _id: 0,
+    mergeStatus: 1,
+    repoFullName: 1,
+    defaultBranchName: 1,
+    unmergedBranchName: 1,
+  }
   pss = await SyncStateManager.getProjectState(projectId, projection)
   if (!pss) {
     pss = { mergeStatus: 'need-export' }
@@ -56,13 +88,19 @@ async function getProjectState(userId, projectId) {
   let canPush
   try {
     const token = await TokenManager.getUserToken(userId)
-    canPush = await api.getPushPermission(token, pss.repoFullName)
+    const repoInfo = await api.getRepoInfo(token, pss.repoFullName)
+    canPush = repoInfo.canPush
+    await refreshRepoMetadata(projectId, pss, repoInfo)
   } catch (err) {
+    // the sync record is kept when the repository is missing or inaccessible:
+    // the owner decides whether to unlink it
     if ((err instanceof NotFoundError) ||
         (err instanceof PermissionDeniedError)
     ) canPush = false
     else throw err
   }
+  // only needed for the refresh above, the panel does not use it
+  delete pss.defaultBranchName
   if (!canPush) {
     pss.mergeStatus = 'need-permission'
     // send owner's email to collaborator
